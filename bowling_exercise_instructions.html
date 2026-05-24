@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Computer Graphics - Exercise 5 - Bowling Alley with WebGL</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .mandatory {
+            background-color: #e8f4f8;
+            border-left: 5px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .code {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+        }
+        .note {
+            background-color: #fffbea;
+            border-left: 5px solid #f1c40f;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        .resources {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: #FFFF99;
+            font-weight: bold;
+            padding: 2px 4px;
+        }
+        .pin-table {
+            width: auto;
+            margin: 10px 0;
+        }
+        .pin-table td {
+            text-align: center;
+            padding: 4px 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Computer Graphics - Exercise 5</h1>
+        <h2>Bowling Alley with WebGL</h2>
+        <p>Spring Semester 2026</p>
+    </div>
+
+    <h2>Overview</h2>
+    <p>
+        In this exercise, you will implement a 3D bowling alley scene using WebGL and Three.js.
+        You will create a realistic bowling lane with proper markings, a set of ten pins in regulation formation,
+        and a bowling ball with finger holes. This exercise focuses on building the static infrastructure only.
+    </p>
+
+    <div class="mandatory">
+        <h3>MANDATORY REQUIREMENTS - HW05 INFRASTRUCTURE</h3>
+        <p>Your implementation <strong>MUST</strong> include ALL of the following infrastructure elements:</p>
+        <ol>
+            <li>A properly detailed bowling lane with at least the following markings:
+                <ul>
+                    <li>Foul line (white or red line across the lane width)</li>
+                    <li>Approach dots (two rows of dots on the approach area)</li>
+                    <li>Lane arrows (targeting arrows embedded in the lane)</li>
+                    <li>Gutters on both sides</li>
+                    <li>Approach area (slightly different color/shade from the lane)</li>
+                </ul>
+            </li>
+            <li>Ten bowling pins in triangular formation, each with:
+                <ul>
+                    <li>Proper pin shape (wider body, narrower neck, rounded top)</li>
+                    <li>White color with red stripe markings</li>
+                    <li>Correct triangular arrangement (1-2-3-4 row pattern)</li>
+                    <li>Pin deck area (distinct surface behind the pins)</li>
+                    <li>Proper spacing (~1 unit / 12 inches center-to-center)</li>
+                </ul>
+            </li>
+            <li>A static bowling ball with:
+                <ul>
+                    <li>Three finger holes (two adjacent, one offset)</li>
+                    <li>Glossy/shiny material appearance</li>
+                    <li>Positioned on the approach area (static, no rolling)</li>
+                    <li>Proper size relative to lane and pins</li>
+                </ul>
+            </li>
+            <li>Camera and lighting infrastructure:
+                <ul>
+                    <li>Appropriate lighting with shadows</li>
+                    <li>Interactive camera controls (orbit)</li>
+                    <li>Appropriate initial camera positioning</li>
+                </ul>
+            </li>
+            <li>Basic UI framework:
+                <ul>
+                    <li>HTML container elements for future bowling scorecard display</li>
+                    <li>HTML container elements for future controls display</li>
+                    <li>Basic CSS styling for UI elements</li>
+                </ul>
+            </li>
+        </ol>
+        <div class="note">
+            <p><strong>Note:</strong> Interactive controls, physics-based ball rolling, pin collision mechanics, and the scoring system will be implemented in the next exercise (HW06).</p>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>SPECIFIC IMPLEMENTATION DETAILS</h3>
+        <p>Your bowling alley must meet these specific requirements:</p>
+
+        <h4>1. Lane Dimensions and Appearance</h4>
+        <ul>
+            <li>Lane surface should be a light maple/wood color with a glossy finish</li>
+            <li>Lane proportions approximately 17:1 (length:width) &mdash; about 60 units long, 3.5 units wide</li>
+            <li>Foul line must be clearly visible (white or red, thin line across full width)</li>
+            <li>Approach area (~15 units long) should be a subtly different color/shade from the lane</li>
+            <li>Gutters must be slightly lower than the lane surface and run the full lane length</li>
+            <li>Lane arrows positioned approximately 15 units from the foul line</li>
+        </ul>
+
+        <h4>2. Bowling Pins</h4>
+        <ul>
+            <li>Each pin must be approximately 1.25 units tall</li>
+            <li>Pin body should be wider at the base, narrow at the neck, with a rounded top (use multiple geometries or <code>THREE.LatheGeometry</code>)</li>
+            <li>White with at least one red stripe/band around the neck area</li>
+            <li>Triangular formation: 1 pin in front row, 2 in second, 3 in third, 4 in back row</li>
+            <li>Pin spacing ~1.0 unit center-to-center</li>
+            <li>Head pin positioned approximately 57 units from the foul line</li>
+        </ul>
+
+        <h4>3. Static Bowling Ball</h4>
+        <ul>
+            <li>Ball radius approximately 0.45 units (diameter ~0.9 units)</li>
+            <li>Three finger holes visible on the surface (two close together, one offset)</li>
+            <li>Finger holes can be small dark cylinders embedded slightly into the sphere surface</li>
+            <li>Glossy material with high shininess</li>
+            <li>Positioned on the approach area, centered on the lane</li>
+            <li>NO physics or movement</li>
+        </ul>
+
+        <h4>4. UI Framework Preparation</h4>
+        <ul>
+            <li>Create HTML containers for future bowling scorecard display (10-frame format)</li>
+            <li>Create HTML containers for future controls instructions</li>
+            <li>Implement basic CSS styling for UI elements</li>
+            <li>Position UI elements appropriately on screen</li>
+            <li>Ensure camera controls are toggleable with 'O' key</li>
+        </ul>
+    </div>
+
+    <div class="note">
+        <h3>CONTROLS FOR HW05 INFRASTRUCTURE</h3>
+        <p>
+            Your HW05 implementation <strong>MUST</strong> support this control:
+        </p>
+        <ul>
+            <li><span class="highlight">O Key</span>: Toggle orbit camera controls</li>
+        </ul>
+        <p>
+            <strong>Note:</strong> Interactive bowling controls (aiming, power meter, ball release) will be implemented in the next exercise (HW06).
+        </p>
+    </div>
+
+    <h3>Getting Started with the Starter Code</h3>
+    <p>
+        The starter code provides you with the following:
+    </p>
+    <ul>
+        <li>Basic THREE.js setup (scene, camera, renderer)</li>
+        <li>Basic lighting setup with shadows enabled</li>
+        <li>A simple lane surface without any markings</li>
+        <li>Orbit camera controls that can be toggled with the 'O' key</li>
+        <li>Basic animation loop</li>
+    </ul>
+
+    <p>Your task is to build upon this foundation by adding all the required elements.</p>
+
+    <h3>Step-by-Step Implementation Guide</h3>
+
+    <ol>
+        <li>
+            <strong>Study the existing code</strong>
+            <p>Examine the starter code to understand the scene setup, camera positioning, and orbit controls.</p>
+        </li>
+        <li>
+            <strong>Add lane markings and gutters</strong>
+            <p>Implement the foul line, approach dots, targeting arrows, gutters, and approach area.</p>
+        </li>
+        <li>
+            <strong>Create the bowling pins</strong>
+            <p>Implement 10 pins in the standard triangular formation with proper shape and appearance.</p>
+        </li>
+        <li>
+            <strong>Create the static bowling ball</strong>
+            <p>Implement a bowling ball with finger holes, positioned on the approach area.</p>
+        </li>
+        <li>
+            <strong>Set up UI framework</strong>
+            <p>Create HTML containers and CSS styling for future interactive elements.</p>
+        </li>
+    </ol>
+
+    <h3>Pin Position Reference</h3>
+    <p>The 10 pins are arranged in a standard triangular formation (1-2-3-4 rows). Using the coordinate system where the foul line is at Z=0 and pins are at negative Z values:</p>
+    <div class="code">
+Pin  1 (head pin):  X=  0.0,  Z= -57.000
+Pin  2:             X= -0.5,  Z= -57.866
+Pin  3:             X=  0.5,  Z= -57.866
+Pin  4:             X= -1.0,  Z= -58.732
+Pin  5:             X=  0.0,  Z= -58.732
+Pin  6:             X=  1.0,  Z= -58.732
+Pin  7:             X= -1.5,  Z= -59.598
+Pin  8:             X= -0.5,  Z= -59.598
+Pin  9:             X=  0.5,  Z= -59.598
+Pin 10:             X=  1.5,  Z= -59.598
+    </div>
+    <p>Pin numbering follows the standard bowling convention:</p>
+    <div class="code">
+        7   8   9   10      (back row - 4 pins)
+          4   5   6         (third row - 3 pins)
+            2   3           (second row - 2 pins)
+              1             (head pin - closest to bowler)
+    </div>
+
+    <h3>Grading Criteria</h3>
+    <table>
+        <tr>
+            <th>Component</th>
+            <th>Points</th>
+            <th>Requirements</th>
+        </tr>
+        <tr>
+            <td>Bowling Lane &amp; Markings</td>
+            <td>20</td>
+            <td>Lane surface, foul line, approach dots, lane arrows, gutters, approach area</td>
+        </tr>
+        <tr>
+            <td>Pin Setup</td>
+            <td>20</td>
+            <td>10 pins in triangular formation with proper shape, pin deck, spacing</td>
+        </tr>
+        <tr>
+            <td>Bowling Ball</td>
+            <td>20</td>
+            <td>Sphere with finger holes, glossy material, proper size and positioning</td>
+        </tr>
+        <tr>
+            <td>Camera &amp; Lighting</td>
+            <td>10</td>
+            <td>Orbit camera toggle, shadows, proper initial camera position</td>
+        </tr>
+        <tr>
+            <td>UI Framework</td>
+            <td>15</td>
+            <td>HTML containers and CSS styling for future bowling scorecard and controls</td>
+        </tr>
+        <tr>
+            <td>Code Quality</td>
+            <td>5</td>
+            <td>Well-organized, commented, and efficient code</td>
+        </tr>
+    </table>
+
+    <div class="note">
+        <h3>Additional Infrastructure Challenges (Optional) - Bonus: 10 Points</h3>
+        <p>For students seeking additional challenges in HW05, consider implementing any of these features for up to 10 bonus points:</p>
+        <ul>
+            <li>Ball return machine/track alongside or behind the lane</li>
+            <li>Seating area behind the approach (bench or chairs)</li>
+            <li>Overhead monitor/scoring display screen</li>
+            <li>Lane bumpers (raised guards in the gutters)</li>
+            <li>Textured surfaces (wood grain on lane, carpet on approach)</li>
+            <li>Multiple camera preset positions (bowler view, overhead, pin-end, side view)</li>
+        </ul>
+        <p><strong>Note:</strong> Physics, interactive controls, and scoring features will be the focus of the next exercise (HW06).</p>
+    </div>
+
+    <div class="resources">
+        <h3>Helpful Resources</h3>
+        <ul>
+            <li><a href="https://threejs.org/docs/">Three.js Documentation</a></li>
+            <li><a href="https://threejs.org/examples/">Three.js Examples</a></li>
+            <li><a href="https://discoverthreejs.com/">Discover Three.js</a></li>
+        </ul>
+    </div>
+
+    <h3>Submission Requirements</h3>
+    <p>
+        Submit your completed exercise in one of the following ways:
+    </p>
+    <ul>
+        <li><strong>RECOMMENDED: Link to a public GitHub repository</strong> containing your code and screenshots</li>
+        <li>Alternative: Zip file containing all files</li>
+    </ul>
+    <p>
+        Your submission must include:
+    </p>
+    <ul>
+        <li>All source code files</li>
+        <li>A README.md file explaining:
+            <ul>
+                <li><strong>MANDATORY: Full names of all group members</strong></li>
+                <li>How to run your implementation</li>
+                <li>Any additional features you implemented</li>
+                <li>Any known issues or limitations</li>
+                <li>Sources of any external assets used</li>
+            </ul>
+        </li>
+        <li><strong>MANDATORY: Screenshots of your implementation showing:</strong>
+            <ul>
+                <li>Overall view of the bowling lane with pins</li>
+                <li>Close-up view of the pin formation</li>
+                <li>View showing the bowling ball on the approach area</li>
+                <li>View demonstrating camera controls functionality</li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="note">
+        <p><strong>Due Date:</strong> June 5, 2026, 23:59</p>
+    </div>
+
+</body>
+</html>

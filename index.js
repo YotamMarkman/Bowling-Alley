@@ -12,6 +12,8 @@ const app = express()
 const port = 8000
 
 app.use("/src", express.static(__dirname + "/src"));
+// Serve root-level static assets (e.g. style.css) alongside the app.
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/index.html'));
